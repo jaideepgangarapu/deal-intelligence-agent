@@ -52,6 +52,9 @@ def generate_answer(question):
     )
 
     memories = "\n".join(result.text for result in results)
+    print("\nHindsight recalled:")
+    for result in results:
+     print("-", result.text)
 
     response = groq.chat.completions.create(
         model="openai/gpt-oss-120b",
