@@ -1,4 +1,4 @@
-# Deal Intelligence Agent
+# Elephant: Never Forgets What the CFO Said
 
 An AI-powered sales assistant that uses **Hindsight memory** and **Groq** to remember customer interactions, recall important deal information, and turn it into sales intelligence: risks, stakeholders, deal changes, and next actions.
 
