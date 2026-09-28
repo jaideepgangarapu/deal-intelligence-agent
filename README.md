@@ -1,252 +1,278 @@
 # Elephant: Never Forgets What the CFO Said
 
-An AI-powered sales assistant that uses **Hindsight memory** and **Groq** to remember customer interactions, recall important deal information, and turn it into sales intelligence: risks, stakeholders, deal changes, and next actions.
+An AI-powered sales assistant that uses Hindsight memory and Groq to remember customer interactions, recall important deal context, and turn scattered conversation history into actionable deal intelligence.
 
-## Problem
+## Overview
 
-Sales teams handle many customer conversations across different stages of a deal. Important information is spread across meetings, calls, emails, and discussions with different stakeholders, which makes it hard to quickly remember:
+This project was originally a Python CLI tool and is now a polished hackathon-ready web application. The app helps sales teams keep track of customer concerns, stakeholders, changes in the deal, risk signals, and next actions without relying on memory alone.
 
-- Customer objections
-- Pricing concerns
-- Competitor considerations
-- Stakeholder requirements
-- Implementation expectations
-- Security or approval requirements
+## Problem Statement
 
-A salesperson may need to review previous conversations manually before deciding how to approach the next interaction.
+Sales teams often lose valuable context because customer information is spread across calls, emails, and meetings. Important details like pricing objections, integration blockers, security requirements, stakeholder concerns, and deadline changes are easy to forget.
 
-## Solution
+Without that historical context, sales conversations become inconsistent and opportunities move slower than they should.
 
-The Deal Intelligence Agent is a memory-powered assistant for sales teams.
+## Our Solution
 
-The salesperson records customer interactions as they happen, and they are stored in Hindsight memory. Later, the salesperson asks a question or runs an analysis. Hindsight recalls the relevant memories, and Groq uses that context to produce a clear, grounded result.
+The Deal Intelligence Agent stores each interaction in a deal-specific memory bank, retrieves the most relevant recall from previous conversations, and uses Groq to generate grounded analysis. The system surfaces:
 
-The agent does not depend only on the current conversation. It uses information retained from earlier customer interactions to give deal-specific context.
+- Deal risk radar
+- Stakeholder relationship map
+- Timeline of deal changes
+- Recommended next action
+- Memory-backed AI answers
 
-```text
-Remember -> Recall -> Analyze -> Detect Risks -> Understand Stakeholders -> Track Deal Changes -> Recommend Action
-```
+The existing Python logic remains the real engine. The new frontend simply makes it easier to interact with that functionality in a clean product experience.
 
-## Features
+## Key Features
 
-### Core features
-- Store customer interactions in Hindsight memory
-- Recall relevant information from previous deal interactions
-- Generate deal-specific answers using Groq
-- Combine information from multiple customer stakeholders
-- Support questions about pricing, integration, implementation, and security concerns
-- Keep customer context available across separate interactions
-- Simple command-line interface for sales teams
+- Deal-specific Hindsight memory banks
+- AI-generated deal summaries grounded in prior context
+- Risk radar for pricing, security, technical, procurement, and approval issues
+- Stakeholder tracking for roles, concerns, and decision-makers
+- Timeline of changes and unresolved blockers
+- Next-best-action recommendations and planning support
+- Web dashboard with a polished UI for demos
 
-### New intelligence features
+## Why It Matters
 
-1. **Deal Risk Radar**
-   Finds risks and blockers in recalled memories: pricing objections, technical/integration concerns, security or legal approvals, procurement problems, deadlines, missing approvals, and other unresolved blockers. Each risk gets a **High / Medium / Low** level, a short reason, a status (Open / Addressed), and evidence quoted from memory. Risks without supporting memory are never shown.
-
-2. **Stakeholder Relationship Map**
-   Builds a structured map of everyone involved in the deal: name, role/department, concerns, requirements, objections, requests, approval responsibility, and whether they are blocking the deal. Missing details show `Not stated`. Supports questions such as "Who has pricing concerns?" or "Who is blocking the deal?"
-
-3. **Deal Timeline & Change Detector**
-   Builds a chronological timeline showing new objections, new requirements, pricing changes, new stakeholders, deadline changes, resolved concerns, and newly unresolved concerns. It uses recorded interaction order and timestamps and never invents dates. Supports questions such as "What changed since the first interaction?"
-
-4. **Next Best Action**
-   Reads the risks, stakeholders, and changes, then recommends what the salesperson should do next and drafts a follow-up message. The draft only mentions facts found in memory and does not promise terms that were never agreed.
-
-5. **Multi-Deal Memory Isolation**
-   Each customer gets its own Hindsight memory bank (for example `deal-technova`, `deal-infosys`). Analyzing one deal never uses another deal's memories.
+This project turns fragmented deal history into usable, trusted intelligence. Instead of forcing a salesperson to manually review old notes, the app memory-remembers what matters and brings it back when it is most useful.
 
 ## How It Works
 
-1. The salesperson selects or creates a deal.
-2. The salesperson enters a customer interaction, which is tagged with its order and time and stored in that deal's Hindsight bank.
-3. The salesperson asks a question or runs Risk Radar, Stakeholder Map, Timeline, or Next Best Action.
-4. Several targeted recall queries run against the deal's memory bank and the results are merged.
-5. The recalled memories are sent to Groq with a task-specific prompt that requires JSON output with quoted evidence.
-6. The application checks every item's evidence against the recalled memories and removes unsupported items.
-7. The result is displayed to the salesperson.
+1. A deal is selected or created in the web dashboard.
+2. The user adds an interaction for that deal.
+3. Hindsight stores the memory with the interaction metadata.
+4. Groq and the existing deal-analysis logic recall the relevant context.
+5. The system validates evidence against the stored memories.
+6. The dashboard shows risks, stakeholders, changes, and recommendations.
 
-## Grounding and Safety Against Invented Information
+## Architecture
 
-- Groq runs at temperature 0 and must answer with JSON.
-- Every risk, stakeholder, event, and action must include evidence quoted from memory.
-- Evidence is verified in code. Items whose quotes are not found in the recalled memories are dropped, and the number removed is shown.
-- Anything not stated in memory is shown as `Not stated`.
-- A concern is only marked "Addressed" if a later interaction explicitly says so.
-- If no memories exist for a deal, the agent says so instead of guessing.
+```text
+User
+  |
+  v
+Web dashboard (Flask)
+  |
+  v
+Python deal engine (core.py)
+  |
+  +--> Hindsight memory for each deal
+  |
+  +--> Groq analysis for grounded AI output
+  |
+  +--> Evidence validation against remembered facts
+  |
+  v
+UI output (risk, stakeholders, timeline, next best action)
+```
 
-## Technologies Used
+## Groq Integration
+
+Groq is used where it adds real value: generating grounded analysis based on recalled customer memories. The app keeps the API key in `.env` and never hardcodes secrets. The project uses the official Groq Python client and a temperature of 0 for more deterministic results.
+
+## Hindsight Integration
+
+Hindsight is the memory layer that enables the system to remember earlier customer interactions and retrieve relevant context later. Each deal has isolated memory storage, which prevents cross-deal contamination and makes the experience much more realistic for sales workflows.
+
+## Technology Stack
 
 - Python 3.14
+- Flask
 - Hindsight Memory / Hindsight Cloud
 - Groq API
-- hindsight-client
-- groq
-- python-dotenv
+- HTML, CSS, and Jinja templates
+- Python-dotenv
+- pytest
 
 ## Project Structure
 
 ```text
 deal-intelligence-agent/
-|-- agent.py              # CLI menu (original options + new options)
-|-- core.py               # per-deal memory banks, recall, analysis engine, evidence validation
-|-- prompts.py            # prompts and JSON formats for the four analysis modes
-|-- test_hindsight.py
-|-- requirements.txt
-|-- README.md
-|-- deals.json            # created automatically: deal names and interaction counters
-|-- screenshot-menu.png
-|-- screenshot-memory1.png
-|-- screenshot-memory1.1.png
-|-- screenshot-answer.png
-|-- .gitignore
-|-- .env
-`-- .venv/
+├── app.py                 # Flask web app and dashboard routes
+├── core.py                # Existing deal-memory + analysis engine
+├── prompts.py             # AI prompt definitions for the analysis modes
+├── agent.py               # Original CLI entry point preserved
+├── test_hindsight.py      # Original Hindsight test example
+├── tests/
+│   └── test_app.py        # App smoke test
+├── templates/
+│   ├── index.html         # Landing page
+│   └── dashboard.html     # Deal dashboard and analysis panels
+├── static/
+│   └── styles.css         # Professional hackathon UI styling
+├── deals.json             # Created automatically for deal metadata
+├── requirements.txt
+├── README.md
+├── .env.example
+├── .gitignore
+├── .env                   # Local environment file (not committed)
+├── screenshots...
+└── .venv/
 ```
 
-## Hindsight Memory
+## Prerequisites
 
-Hindsight is the core memory component of the application.
+- Python 3.12+
+- Git
+- A Hindsight API key
+- A Groq API key
 
-- **Retain:** when the salesperson enters a customer interaction, it is stored in the deal's Hindsight memory bank, tagged with an interaction number and recorded time.
-- **Recall:** when a question is asked or an analysis is run, Hindsight searches the stored memories and returns what is relevant. The Risk Radar, Stakeholder Map, Timeline, and Next Best Action each run several recall queries (pricing, security, integration, deadlines, approvals, and so on) and merge the results so fewer details are missed.
-
-The recalled memories are then provided to Groq so it can respond using the customer's previous context.
-
-## Architecture
-
-```text
-Salesperson (CLI)
-       |
-       v
-Select deal -> Customer interaction
-       |
-       v
-Hindsight Memory (one bank per deal)
-       |
-       |  Multi-query recall, merged
-       v
-Groq LLM (mode-specific prompt, JSON output)
-       |
-       v
-Evidence validation (unsupported items removed)
-       |
-       v
-Risk Radar | Stakeholder Map | Timeline | Next Best Action
-```
-
-## Data Flow
-
-1. The salesperson selects a deal (option 4).
-2. A customer interaction is entered (option 9).
-3. The interaction is tagged, for example `[Interaction #3 | recorded 2026-09-28 14:30]`, and sent to that deal's Hindsight bank.
-4. The salesperson later runs an analysis or asks a question.
-5. The application sends several recall queries to Hindsight.
-6. Hindsight returns relevant memories, which are merged and de-duplicated.
-7. The memories and the salesperson's question are sent to Groq with the mode-specific prompt.
-8. Groq returns JSON with evidence for each item.
-9. The application removes any item whose evidence is not found in the memories.
-10. The result is displayed.
-
-## Menu
-
-```text
-1. Add customer interaction          (original)
-2. Ask about a deal                  (original)
-3. Exit                              (original)
-4. Select / create deal
-5. Deal Risk Radar
-6. Stakeholder Map
-7. Deal Timeline & Changes
-8. Next Best Action
-9. Add interaction to selected deal
-```
-
-Options 1 and 2 use the original shared memory bank. Options 4 to 9 use a separate bank per deal.
-
-## Example: Memory-Based Learning
-
-Suppose a salesperson records these interactions with TechNova Inc. (option 9):
-
-1. The CTO is concerned about integration with the existing system.
-2. The CFO considers the pricing too high and requests a 10% discount.
-3. Procurement wants the solution deployed within four weeks.
-4. Legal requires a security review before approving the deal.
-
-Later, the salesperson asks (option 2 or 6):
-
-```text
-What are the main concerns from the CTO, CFO, Procurement, and Legal teams?
-```
-
-## Example Output Formats
-
-The examples below show the layout of each result. Actual wording depends on the stored memories.
-
-### Deal Risk Radar (option 5)
-
-```text
-=========== DEAL RISK RADAR ===========
-
-[HIGH] Security/Legal: Security review pending
-    Why: Legal will not approve until the review is complete.
-    Status: Open
-    Evidence: "Legal requires a security review before approving the deal"
-
-[MEDIUM] Pricing: Discount request
-    Why: CFO objection with no resolution recorded.
-    Status: Open
-    Evidence: "The CFO considers the pricing too high and requests a 10% discount"
-```
-
-### Stakeholder Map (option 6)
-
-```text
-[1] Not stated | CFO
-    ----------------------------------------------------------------------
-    Concerns                | Pricing is too high
-    Requests                | 10% discount
-    Approval responsibility | Not stated
-    Blocking the deal?      | Not stated
-```
-
-### Deal Timeline (option 7)
-
-```text
-Interaction #1  [Technical concern]
-    The CTO is concerned about integration with the existing system.
-
-Interaction #4  [Security/Legal]
-    Legal requires a security review before approving the deal.
-```
-
-### Next Best Action (option 8)
-
-```text
-1. Address the pricing objection with the CFO
-    Who: CFO
-    Why: The discount request has no recorded resolution.
-
---- Draft follow-up message ---
-To: CFO
-Subject: Follow-up on pricing
-...
-```
-
-## Running the Application
-
-### 1. Clone the repository
+## Installation
 
 ```bash
-git clone https://github.com/jaideepgangarapu/deal-intelligence-agent.git
+git clone <your-repo-url>
+cd deal-intelligence-agent
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+```env
+HINDSIGHT_BASE_URL=https://api.hindsight.vectorize.io
+HINDSIGHT_API_KEY=your_hindsight_key
+GROQ_API_KEY=your_groq_key
+SECRET_KEY=choose_a_secure_value
+```
+
+## Running Locally
+
+```bash
+python app.py
+```
+
+Then open:
+
+```text
+http://localhost:5000
+```
+
+The landing page shows the product overview, and the dashboard is available at:
+
+```text
+http://localhost:5000/dashboard
+```
+
+## Testing
+
+```bash
+python -m pytest -q
+```
+
+## Deployment
+
+The repository includes a Render Blueprint in `render.yaml`. To deploy:
+
+1. Push the project to the `main` branch on GitHub.
+2. In Render, choose **New > Blueprint** and connect `jaideepgangarapu/deal-intelligence-agent`.
+3. During the initial Blueprint setup, enter `HINDSIGHT_BASE_URL`, `HINDSIGHT_API_KEY`, and `GROQ_API_KEY`. Render generates `SECRET_KEY`.
+4. Create the Blueprint and wait for the `/health` check to pass.
+5. Open the `onrender.com` URL shown for the service.
+
+The service uses Render's free web plan. Local `.env` and `deals.json` files are intentionally excluded from Git; the deployed app will not contain the local deal list. Create the deal again in the hosted dashboard to access its Hindsight bank. The Blueprint does not provision paid persistent storage, so local deal metadata may reset when the service restarts or redeploys. Hindsight remains the persistent memory store.
+
+Never commit `.env` or enter API keys in GitHub. Add secret values only through Render's protected environment-variable setup.
+
+## GitHub Repository
+
+This project is already versioned in Git. For a standard workflow:
+
+```bash
+git status
+git add .
+git commit -m "Build hackathon web application"
+git push
+```
+
+## Live Demo
+
+Not deployed yet. Add the Render service URL here after the first successful deployment.
+
+## Hackathon Demo Flow
+
+1. Open the dashboard.
+2. Create or select a deal.
+3. Add a customer interaction.
+4. Ask the AI for a summary or run Deal Risk Radar.
+5. Review the Hindsight-backed insights.
+6. Use the stakeholder and timeline views to explain the deal story.
+7. Show how the app can carry context between customer conversations.
+
+## Team
+
+Built for a hackathon as a memory-powered sales intelligence application.
+
+## License
+
+This project is currently distributed without a formal license file. Add one if you plan to open-source it publicly.
+
+## Original CLI Behavior
+
+The project still preserves the original Python functionality from the earlier version. The CLI file remains available as `agent.py`, while the web app becomes the polished product demo layer.
+
+## Beginner-Friendly Local Setup
+
+### Step 1: Clone the repository
+
+```bash
+git clone <your-repo-url>
 cd deal-intelligence-agent
 ```
 
-### 2. Create and activate a virtual environment
+### Step 2: Open the project in VS Code
+
+Open the folder in VS Code and make sure the terminal is pointed at the project root.
+
+### Step 3: Create a virtual environment
 
 ```bash
 python -m venv .venv
+```
+
+### Step 4: Activate it on Windows
+
+```bash
 .venv\Scripts\activate
 ```
+
+### Step 5: Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 6: Create `.env`
+
+```bash
+copy .env.example .env
+```
+
+### Step 7: Add Groq credentials
+
+Add your Groq key to `.env`.
+
+### Step 8: Add Hindsight credentials
+
+Add your Hindsight API key and base URL to `.env`.
+
+### Step 9: Run the app
+
+```bash
+python app.py
+```
+
+### Step 10: Open the local website
+
+```text
+http://localhost:5000
+```
+
+The app will show the landing page and the dashboard for interacting with the deal memory system.
 
 ### 3. Install dependencies
 

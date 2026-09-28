@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard | Deal Intelligence Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body class="dashboard-body">
+    <header class="topbar topbar-light">
+      <div class="container nav">
+        <div class="brand">
+          <span class="brand-mark">D</span>
+          <span>Deal Intelligence Agent</span>
+        </div>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/dashboard" class="button button-primary">Dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container dashboard-shell">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <section class="page-header panel">
+        <div>
+          <p class="eyebrow">Deal workspace</p>
+          <h1>{% if selected_name %}{{ selected_name }}{% else %}No deal selected{% endif %}</h1>
+        </div>
+        <div class="header-actions">
+          <form method="post">
+            <input type="hidden" name="action" value="create_deal">
+            <input type="text" name="deal_name" placeholder="Create or choose a deal" aria-label="Deal name">
+            <button type="submit" class="button button-primary">Create deal</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel selector-panel">
+        <form method="post">
+          <input type="hidden" name="action" value="select_deal">
+          <label for="deal_slug">Which deal would you like to work on?</label>
+          <div class="selector-row">
+            <select id="deal_slug" name="deal_slug">
+              <option value="">Select a deal</option>
+              {% for slug, deal in deals.items() %}
+                <option value="{{ slug }}" {% if selected_slug == slug %}selected{% endif %}>{{ deal.name }} ({{ deal.count }} interactions)</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="button button-secondary">Open deal</button>
+          </div>
+        </form>
+      </section>
+
+      {% if selected_slug %}
+        <section class="grid-two">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Add customer interaction</h3>
+            </div>
+            <form method="post">
+              <input type="hidden" name="action" value="add_interaction">
+              <textarea name="interaction" rows="6" placeholder="Example: The CFO is concerned about pricing and wants a 10% discount before approval."></textarea>
+              <button type="submit" class="button button-primary full-width">Store interaction</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Ask the agent</h3>
+            </div>
+            <form method="post">
+              <input type="hidden" name="action" value="ask_question">
+              <textarea name="question" rows="6" placeholder="What are the key blockers and who is involved?"></textarea>
+              <button type="submit" class="button button-primary full-width">Generate answer</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel analysis-panel">
+          <div class="panel-header">
+            <h3>Run analysis</h3>
+          </div>
+          <div class="analysis-grid">
+            <form method="post" class="analysis-form">
+              <input type="hidden" name="action" value="run_analysis">
+              <select name="mode" aria-label="Analysis mode">
+                <option value="risk">Deal Risk Radar</option>
+                <option value="stakeholder">Stakeholder Map</option>
+                <option value="timeline">Deal Timeline & Changes</option>
+                <option value="next">Next Best Action</option>
+              </select>
+              <textarea name="question" rows="3" placeholder="Optional focused question for the analysis"></textarea>
+              <button type="submit" class="button button-secondary full-width">Run analysis</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="grid-two bottom-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Recent interactions</h3>
+            </div>
+            <div class="interaction-list">
+              {% if interactions %}
+                {% for item in interactions %}
+                  <div class="interaction-item">
+                    <strong>{{ item.number }}</strong>
+                    <p>{{ item.text }}</p>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p class="muted">No interactions recorded for this deal yet.</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Output</h3>
+            </div>
+            {% if analysis %}
+              {% if analysis.empty %}
+                <p class="muted">No memories found for this deal yet. Add an interaction to populate the memory bank.</p>
+              {% elif analysis.answer %}
+                <div class="output-box">
+                  <h4>AI answer</h4>
+                  <p>{{ analysis.answer }}</p>
+                </div>
+              {% endif %}
+
+              {% if analysis.risks %}
+                <div class="output-box">
+                  <h4>Risks</h4>
+                  {% for item in analysis.risks %}
+                    <div class="output-item">
+                      <strong>[{{ item.level }}] {{ item.title }}</strong>
+                      <p>{{ item.reason }}</p>
+                      <small>{{ item.status }}</small>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if analysis.stakeholders %}
+                <div class="output-box">
+                  <h4>Stakeholders</h4>
+                  {% for item in analysis.stakeholders %}
+                    <div class="output-item">
+                      <strong>{{ item.name or 'Not stated' }} | {{ item.role or 'Not stated' }}</strong>
+                      <p>Concerns: {{ item.concerns|join(', ') if item.concerns else 'Not stated' }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if analysis.events %}
+                <div class="output-box">
+                  <h4>Timeline</h4>
+                  {% for item in analysis.events %}
+                    <div class="output-item">
+                      <strong>{{ item.when }}</strong>
+                      <p>{{ item.event }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if analysis.actions %}
+                <div class="output-box">
+                  <h4>Next best actions</h4>
+                  {% for item in analysis.actions %}
+                    <div class="output-item">
+                      <strong>{{ item.action }}</strong>
+                      <p>{{ item.reason }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if analysis.memories %}
+                <div class="output-box memories-box">
+                  <h4>Recalled memories</h4>
+                  {% for memory in analysis.memories %}
+                    <p>{{ memory }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              <p class="muted">Run an analysis or ask a question to see results here.</p>
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
+    </main>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Deal Intelligence Agent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container nav">
+        <div class="brand">
+          <span class="brand-mark">D</span>
+          <span>Deal Intelligence Agent</span>
+        </div>
+        <nav>
+          <a href="#overview">Overview</a>
+          <a href="#features">Features</a>
+          <a href="#workflow">Workflow</a>
+          <a href="/dashboard" class="button button-primary">Open dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <p class="eyebrow">AI sales memory for real deal momentum</p>
+            <h1>Turn scattered customer conversations into deal intelligence.</h1>
+            <p class="lede">
+              Remember what the customer said, recall the important context, and surface risks,
+              stakeholders, and next actions before the next call.
+            </p>
+            <div class="cta-row">
+              <a class="button button-primary" href="/dashboard">Try the dashboard</a>
+              <a class="button button-secondary" href="#features">View capabilities</a>
+            </div>
+            <ul class="mini-metrics">
+              <li><strong>Risk Radar</strong><span>Spot blockers early</span></li>
+              <li><strong>Stakeholder Map</strong><span>Map the decision makers</span></li>
+              <li><strong>Memory Recall</strong><span>Use previous context</span></li>
+            </ul>
+          </div>
+          <div class="hero-card">
+            <div class="panel-header">
+              <span class="status-dot"></span>
+              Live deal insight
+            </div>
+            <div class="card-metric">
+              <span>Open risk items</span>
+              <strong>3</strong>
+            </div>
+            <div class="card-list">
+              <div>
+                <label>Pricing objection</label>
+                <p>CFO wants a lower price with no recorded resolution.</p>
+              </div>
+              <div>
+                <label>Security review</label>
+                <p>Legal requires review before approval.</p>
+              </div>
+              <div>
+                <label>Deadline risk</label>
+                <p>Deployment target is not yet fully aligned.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="overview" class="info-section">
+        <div class="container grid-3">
+          <article class="feature-card">
+            <h3>Memory-first</h3>
+            <p>Each deal maintains its own Hindsight memory bank so customer context is preserved across interactions.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Grounded AI</h3>
+            <p>Groq analyzes only the recalled memories and the application drops unsupported claims that lack evidence.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Actionable output</h3>
+            <p>The system surfaces risks, stakeholders, change history, and the best next action for the sales team.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="features" class="info-section alt">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">What the system does</p>
+            <h2>Built around the real deal automation workflow</h2>
+          </div>
+          <div class="grid-2">
+            <div class="stack-list">
+              <div class="check-item"><span>✓</span> Deal-specific memory isolation</div>
+              <div class="check-item"><span>✓</span> Stakeholder map based on customer conversations</div>
+              <div class="check-item"><span>✓</span> Risk radar with evidence-backed findings</div>
+              <div class="check-item"><span>✓</span> Timeline of changes and unresolved blockers</div>
+              <div class="check-item"><span>✓</span> Recommended next steps and follow-up drafts</div>
+            </div>
+            <div class="stack-list compact">
+              <div class="info-chip">Pricing concerns</div>
+              <div class="info-chip">Security/legal reviews</div>
+              <div class="info-chip">Implementation blockers</div>
+              <div class="info-chip">Procurement approvals</div>
+              <div class="info-chip">Deadline shifts</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow" class="info-section">
+        <div class="container">
+          <div class="section-heading">
+            <p class="eyebrow">How it works</p>
+            <h2>From customer interaction to deal recommendation</h2>
+          </div>
+          <div class="workflow">
+            <div class="workflow-step">
+              <span>1</span>
+              <h4>Capture</h4>
+              <p>Add each customer interaction to the deal memory bank.</p>
+            </div>
+            <div class="workflow-step">
+              <span>2</span>
+              <h4>Recall</h4>
+              <p>Search the memory bank for pricing, risk, stakeholder, and timeline context.</p>
+            </div>
+            <div class="workflow-step">
+              <span>3</span>
+              <h4>Analyze</h4>
+              <p>Groq turns those memories into grounded risks, insights, and recommendations.</p>
+            </div>
+            <div class="workflow-step">
+              <span>4</span>
+              <h4>Act</h4>
+              <p>Use the output to prepare a next conversation or follow-up plan.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

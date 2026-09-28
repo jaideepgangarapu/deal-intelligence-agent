@@ -3,6 +3,7 @@
 import os
 import re
 import json
+import threading
 import datetime
 import textwrap
 from difflib import SequenceMatcher
@@ -15,15 +16,47 @@ import prompts
 
 load_dotenv()
 
+HINDSIGHT_BASE_URL = os.getenv("HINDSIGHT_BASE_URL")
+HINDSIGHT_API_KEY = os.getenv("HINDSIGHT_API_KEY")
 hindsight = Hindsight(
-    base_url=os.getenv("HINDSIGHT_BASE_URL"),
-    api_key=os.getenv("HINDSIGHT_API_KEY"),
+    base_url=HINDSIGHT_BASE_URL,
+    api_key=HINDSIGHT_API_KEY,
 )
 
 groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 MODEL = "openai/gpt-oss-120b"
 DEALS_FILE = "deals.json"
+
+
+def _run_hindsight_call(method_name, *args, **kwargs):
+    """Run each Hindsight request with a client owned by its worker thread."""
+    result = {}
+    error = {}
+
+    def runner():
+        client = Hindsight(
+            base_url=HINDSIGHT_BASE_URL,
+            api_key=HINDSIGHT_API_KEY,
+        )
+        try:
+            result["value"] = getattr(client, method_name)(*args, **kwargs)
+        except Exception as exc:  # pragma: no cover - surfaced to user as a flash message
+            error["value"] = exc
+        finally:
+            try:
+                client.close()
+            except Exception:
+                pass
+
+    thread = threading.Thread(target=runner, daemon=True)
+    thread.start()
+    thread.join()
+
+    if "value" in error:
+        raise error["value"]
+
+    return result.get("value")
 
 
 # ---------------------------------------------------------------
@@ -110,15 +143,17 @@ def retain_interaction(slug, text):
     )
 
     try:
-        hindsight.retain(
+        _run_hindsight_call(
+            "retain",
             bank_id=bank_for(slug),
             content=content,
-            timestamp=now
+            timestamp=now,
         )
     except TypeError:
-        hindsight.retain(
+        _run_hindsight_call(
+            "retain",
             bank_id=bank_for(slug),
-            content=content
+            content=content,
         )
 
     # Preserve ordering information locally.
@@ -237,9 +272,10 @@ def recall_merged(slug, queries):
     for q in queries:
 
         try:
-            resp = hindsight.recall(
+            resp = _run_hindsight_call(
+                "recall",
                 bank_id=bank,
-                query=q
+                query=q,
             )
 
         except Exception as e:

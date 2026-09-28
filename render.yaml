@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: deal-intelligence-agent
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.14.3"
+      - key: HINDSIGHT_BASE_URL
+        sync: false
+      - key: HINDSIGHT_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
