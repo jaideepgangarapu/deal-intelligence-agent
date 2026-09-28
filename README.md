@@ -191,9 +191,9 @@ git push
 
 ## Live Demo
 
-Live app: https://deal-intelligence-agent-a07t.onrender.com
+Live app: https://deal-intelligence-agent-ao7t.onrender.com
 
-Dashboard: https://deal-intelligence-agent-a07t.onrender.com/dashboard
+Dashboard: https://deal-intelligence-agent-ao7t.onrender.com/dashboard
 
 ## Hackathon Demo Flow
 
