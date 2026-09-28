@@ -191,7 +191,9 @@ git push
 
 ## Live Demo
 
-Not deployed yet. Add the Render service URL here after the first successful deployment.
+Live app: https://deal-intelligence-agent-a07t.onrender.com
+
+Dashboard: https://deal-intelligence-agent-a07t.onrender.com/dashboard
 
 ## Hackathon Demo Flow
 
